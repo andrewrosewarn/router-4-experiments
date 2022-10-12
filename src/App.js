@@ -1,25 +1,19 @@
-import logo from './logo.svg';
-import './App.css';
+import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
+import Posts, { loader as postsLoader } from "./routes/Posts";
+import Post, { loader as postLoader } from "./routes/Post";
+import Wrapper from "./routes/Wrapper";
+
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/" element={<Wrapper />}>
+      <Route path="/posts" element={<Posts />} loader={postsLoader} />
+      <Route path="/posts/:id" element={<Post />} loader={postLoader} />
+    </Route>
+  )
+);
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
