@@ -1,33 +1,34 @@
 import axios from "axios";
-import { Suspense } from "react";
-import { Await, defer, useLoaderData } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+
+const postQuery = (id) => ({
+  queryKey: ["post", id],
+  queryFn: async () => {
+    const response = await axios.get(`https://jsonplaceholder.typicode.com/posts/${id}`);
+    const post = await response.data;
+    return post;
+  },
+  staleTime: Infinity,
+});
+
+export const loader =
+  (queryClient) =>
+  async ({ params }) => {
+    const query = postQuery(params.id);
+    return queryClient.getQueryData(query.queryKey) ?? (await queryClient.fetchQuery(query));
+  };
 
 export default function Post() {
-  const data = useLoaderData();
+  const params = useParams();
+
+  const { data: post } = useQuery(postQuery(params.id));
 
   return (
     <>
       <h2>Post</h2>
-      <Suspense fallback={<p>Loading...</p>}>
-        <Await resolve={data.data} errorElement={<div>Error fethcing post</div>}>
-          {(post) => (
-            <>
-              <h3>{post.data.title}</h3>
-              <div>{post.data.body}</div>
-            </>
-          )}
-        </Await>
-      </Suspense>
+      <h3>{post.title}</h3>
+      <div>{post.body}</div>
     </>
   );
-}
-
-export async function loader({ params }) {
-  const postId = params.id;
-
-  const response = axios.get(`https://jsonplaceholder.typicode.com/posts/${postId}`);
-
-  return defer({
-    data: response,
-  });
 }
